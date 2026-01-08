@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const path = require('path'); // <--- IMPORT THIS
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,7 +11,8 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('.')); // Serve frontend files
+// Serves all static files (css, js, html)
+app.use(express.static(path.join(__dirname, '.'))); 
 
 // Database Connection
 const dbURI = process.env.MONGODB_URI;
@@ -20,10 +22,8 @@ mongoose.connect(dbURI)
   .catch(err => console.log("❌ Connection Error:", err));
 
 // ==========================================
-// 1. DEFINE SCHEMAS & MODELS (Missing in your code)
+// SCHEMAS & MODELS
 // ==========================================
-
-// User Schema
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
@@ -31,7 +31,6 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-// Course Schema
 const courseSchema = new mongoose.Schema({
     userId: { type: String, required: true },
     studentName: String,
@@ -41,7 +40,7 @@ const courseSchema = new mongoose.Schema({
 const Course = mongoose.model('Course', courseSchema);
 
 // ==========================================
-// 2. ROUTES
+// ROUTES
 // ==========================================
 
 // Register User
@@ -113,8 +112,13 @@ app.delete('/delete-course/:id', async (req, res) => {
 });
 
 // ==========================================
-// 3. START SERVER (Only ONCE at the end)
+// 🚨 THE FIX: HOME ROUTE 🚨
 // ==========================================
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Start Server
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
