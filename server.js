@@ -1,4 +1,4 @@
-require('dotenv').config(); // Load environment variables
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -10,23 +10,41 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('.')); // Serve frontend files from root
+app.use(express.static('.')); // Serve frontend files
 
 // Database Connection
-const dbURI = process.env.MONGODB_URI; // Safe connection
+const dbURI = process.env.MONGODB_URI;
 
 mongoose.connect(dbURI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.log("❌ Connection Error:", err));
 
-// ... (Rest of your routes/schemas stay the same) ...
+// ==========================================
+// 1. DEFINE SCHEMAS & MODELS (Missing in your code)
+// ==========================================
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// User Schema
+const userSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true }
 });
-// --- ROUTES ---
+const User = mongoose.model('User', userSchema);
 
-// 1. REGISTER USER
+// Course Schema
+const courseSchema = new mongoose.Schema({
+    userId: { type: String, required: true },
+    studentName: String,
+    courseName: String,
+    courseCode: String
+});
+const Course = mongoose.model('Course', courseSchema);
+
+// ==========================================
+// 2. ROUTES
+// ==========================================
+
+// Register User
 app.post('/register', async (req, res) => {
     const { name, email, password } = req.body;
     try {
@@ -41,7 +59,7 @@ app.post('/register', async (req, res) => {
     }
 });
 
-// 2. LOGIN USER (Updated to return _id)
+// Login User
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -49,7 +67,6 @@ app.post('/login', async (req, res) => {
         if (!user || user.password !== password) {
             return res.status(401).json({ message: "Invalid credentials" });
         }
-        // Send back the user ID so the frontend can use it
         res.json({ 
             message: "Login Successful", 
             user: { _id: user._id, name: user.name, email: user.email } 
@@ -59,17 +76,14 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// 3. REGISTER FOR A COURSE (New!)
+// Register Course
 app.post('/register-course', async (req, res) => {
     const { userId, studentName, courseName, courseCode } = req.body;
-
     try {
-        // Prevent duplicate registration
         const existing = await Course.findOne({ userId, courseCode });
         if (existing) {
             return res.status(400).json({ message: "You have already registered for this course!" });
         }
-
         const newCourse = new Course({ userId, studentName, courseName, courseCode });
         await newCourse.save();
         res.status(201).json({ message: "Course Registered Successfully!" });
@@ -78,7 +92,7 @@ app.post('/register-course', async (req, res) => {
     }
 });
 
-// 4. GET MY COURSES (New!)
+// Get My Courses
 app.get('/my-courses/:userId', async (req, res) => {
     try {
         const courses = await Course.find({ userId: req.params.userId });
@@ -87,18 +101,20 @@ app.get('/my-courses/:userId', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-// 5. DELETE A REGISTERED COURSE (New!)
+
+// Delete Course
 app.delete('/delete-course/:id', async (req, res) => {
     try {
-        const courseId = req.params.id;
-        
-        // Find the course by ID and remove it
-        await Course.findByIdAndDelete(courseId);
-        
+        await Course.findByIdAndDelete(req.params.id);
         res.status(200).json({ message: "Course removed successfully" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+// ==========================================
+// 3. START SERVER (Only ONCE at the end)
+// ==========================================
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+});
