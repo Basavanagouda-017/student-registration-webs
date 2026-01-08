@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Extra styles for the dashboard layout */
+        .dashboard-container { max-width: 800px; margin: 2rem auto; padding: 1rem; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        select { width: 100%; padding: 10px; margin-bottom: 10px; }
+        ul { list-style-type: none; padding: 0; }
+        li { background: #eee; margin: 5px 0; padding: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Welcome, <span id="user-name">Student</span></h2>
+            <button onclick="logout()" style="background: #dc3545; width: auto;">Logout</button>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3>Available Courses</h3>
+                <p>Select a subject to register:</p>
+                
+                <select id="course-select">
+                    <option value="Web Development|WEB101">Web Development (WEB101)</option>
+                    <option value="Java Programming|JAVA202">Java Programming (JAVA202)</option>
+                    <option value="Data Structures|DSA303">Data Structures (DSA303)</option>
+                    <option value="Database Systems|DB404">Database Systems (DB404)</option>
+                </select>
+
+                <button onclick="registerCourse()">Register Course</button>
+                <p id="msg" class="message"></p>
+            </div>
+
+            <div class="card">
+                <h3>My Registered Courses</h3>
+                <ul id="course-list">
+                    </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
